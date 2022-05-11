@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dik Takken - Personal Blog">
+  <meta name="author" content="Dik Takken">
+  <meta name="image" property="og:image" content="../../assets/posts/release-edxml3/featured2.png">
+
+  <title>Dik Takken - Personal Blog</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/mono-blue.min.css">
+  <link rel="stylesheet" href="../../assets/css/customizations.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+  <script src="../../assets/js/load-fonts.js"></script>
+  <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+      crossorigin="anonymous">
+  </script>
+  <script src="../../assets/js/termynal.js"></script>
+  <script src="../../assets/js/jquery.appear.js"></script>
+  <script src="../../assets/js/load-termynal.js"></script>
+  <link rel="stylesheet" href="../../assets/css/termynal.css">
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row menubar">
+        <div class="col-4"><a href="../../about">About</a></div>
+        <div class="col-4"><a href="../">Blog</a></div>
+        <div class="col-4"><a href="../../contact">Contact</a></div>
+      </div>
+      <div class="row title">
+        <div class="col-lg-1"></div>
+        <div class="col-sm-8">
+          <p>Personal<br/>Blog</p>
+        </div>
+        <div class="col-sm-2 d-none d-md-block d-lg-block d-xl-block">
+          <div class="row" style="height: 3em">
+            <img src="../../assets/images/dik-bw-circular.png" class="mx-auto my-auto h-50" alt=""></div>
+        </div>
+        <div class="col-lg-1"></div>
+      </div>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row my-b">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-9">
+          <p>/<a class="mx-2" href="../../">home</a>/<a class="mx-2" href="../">blog</a>/<a class="mx-2" href=".">edxml3</a></p>
+        </div>
+        <div class="col-sm-2"></div>
+      </div>
+      <article>
+        <div class="row text-center my-5 ">
+          <div class="col-lg-1"></div>
+          <div class="col-lg-9">
+            <h1 class="mx-auto my-auto">EDXML 3 Released</h1>
+          </div>
+          <div class="col-lg-2"></div>
+        </div>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="initial col-sm-9">
+              <p>Today I can finally announce the availability of EDXML 3. It is the result of more than a decade of hands-on experience in law enforcement, forensics and cybersecurity. Initially sparked from personal frustration in data analytics, it has slowly evolved to become <a href="https://edxml.org/">what it is today</a>.</p>
+
+              <p>EDXML is about teaching machines to tell stories. It is about teaching machines to understand what story data is telling. To see data like a human analyst sees it. Then, assisting the analyst in reasoning about that data. Connect the dots, <a href="https://edxml.org/concept-mining/"> complete the puzzle</a>, reveal the big picture.</p>
+
+              <p>EDXML enables transforming data into <a href="https://edxml.org/story-telling/">stories</a> that both man and machine can understand. This is done by integrating expert knowledge into the data itself. Technically it is a form of knowledge representation with a focus on simplicity. Its roots in actual real world challenges have made that it fully embraces the ambiguities and uncertainties that exist in real data sets. Its roots in forensics make that its reasoning results are easily verified and traced back to the original data.</p>
+
+              <p>The project was initiated during my time at the High Tech Crime unit of the Dutch National Police Agency. My main source of inspiration was observing the way investigators, myself included, cooperate in teams to connect the dots while working cases.</p>
+
+              <p>While my team cooperated to work cases, my computers were generally not as cooperative. Their role was limited to that of passive tools, unable to share and combine their joint knowledge on their own. Computers could possess key information and not tell anyone about it. In my view, this severely limited the team. It sparked ideas to enable machines to become team players, get actively involved and contribute their vast processing capacity.</p>
+
+              <p>The release consists of the following components:</p>
+
+              <ul>
+                <li><a href="https://edxml.org/spec/">Specification Document</a></li>
+                <li><a href="https://edxml.org/sdk/">Python SDK</a></li>
+                <li><a href="https://github.com/edxml/test-corpus">Test Corpus</a></li>
+                <li><a href="https://github.com/edxml/bricks/">Ontology Brick Collection</a></li>
+              </ul>
+
+              <p>A special thanks goes to <a href="https://northwave-security.com/">Northwave Nederland BV</a>. The data analysis operations at their Security Operations Center as well as their Incident Response Team and other divisions acted as challenging testing grounds and provided tons of inspiration and new ideas that contributed to EDXML 3.</p>
+
+              <p class="small my-5"><i>You can learn more about EDXML on <a href="https://edxml.org/">edxml.org.</a></i></p>
+
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <aside>
+          <div class="row my-5 text-center">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="small">Copyright © Dik Takken</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="text-center small"><a href="../">back to posts</a></p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </aside>
+      </article>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+</div>
+</body>
+</html>

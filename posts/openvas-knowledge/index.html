@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dik Takken - Personal Blog">
+  <meta name="author" content="Dik Takken">
+  <meta property="og:title" content="Dik Takken - Personal Blog">
+  <meta property="og:description" content="Mining OpenVAS Knowledge">
+  <meta property="og:image" content="../../assets/posts/openvas-knowledge/featured.png">
+
+  <title>Dik Takken - Personal Blog</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/mono-blue.min.css">
+  <link rel="stylesheet" href="../../assets/css/customizations.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+  <script src="../../assets/js/load-fonts.js"></script>
+  <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+      crossorigin="anonymous">
+  </script>
+  <script src="../../assets/js/termynal.js"></script>
+  <script src="../../assets/js/jquery.appear.js"></script>
+  <script src="../../assets/js/load-termynal.js"></script>
+  <link rel="stylesheet" href="../../assets/css/termynal.css">
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row menubar">
+        <div class="col-4"><a href="../../about">About</a></div>
+        <div class="col-4"><a href="../">Blog</a></div>
+        <div class="col-4"><a href="../../contact">Contact</a></div>
+      </div>
+      <div class="row title">
+        <div class="col-lg-1"></div>
+        <div class="col-sm-8">
+          <p>Personal<br/>Blog</p>
+        </div>
+        <div class="col-sm-2 d-none d-md-block d-lg-block d-xl-block">
+          <div class="row" style="height: 3em">
+            <img src="../../assets/images/dik-bw-circular.png" class="mx-auto my-auto h-50" alt=""></div>
+        </div>
+        <div class="col-lg-1"></div>
+      </div>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row my-b">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-9">
+          <p>/<a class="mx-2" href="../../">home</a>/<a class="mx-2" href="../">blog</a>/<a class="mx-2" href=".">openvas-knowledge</a></p>
+        </div>
+        <div class="col-sm-2"></div>
+      </div>
+      <article>
+        <div class="row text-center my-5 ">
+          <div class="col-lg-1"></div>
+          <div class="col-lg-9">
+            <h1 class="mx-auto my-auto">Mining OpenVAS Knowledge</h1>
+          </div>
+          <div class="col-lg-2"></div>
+        </div>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="initial col-sm-9">
+              <p>Vulnerability scanners like <a href="https://www.openvas.org/">OpenVAS</a> are an integral part of many security monitoring operations. OpenVAS produces reports that contain a ton of precious information about a networking environment. In fact, if you use OpenVAS you probably know more about your network than you realize. Not only does it reveal security vulnerabilities, it also provides information about installed operating systems, applications, application versions and SSL/TLS certificates installed on your servers. It identifies open networking ports, network routers, and more.</p>
+              <p>There are several challenges to using this information effectively. Firstly, extracting all of that information from the scan reports is tricky. OpenVAS features a vast array of scanning plugins, old ones and newer ones. Various plugins represent the same type of information in different ways. For example, older plugins use a kind of text markup to tag certain information, like this:
+              </p>
+              <pre><code class="plaintext" style="white-space: pre-wrap">
+cvss_base_vector=AV:N/AC:M/Au:N/C:N/I:N/A:N|summary=The remote HTTPS Server is missing the &apos;preload&apos; attribute in the HSTS header.|solution=Submit the domain to the &apos;HSTS preload list&apos; and add the &apos;preload&apos; attribute to the HSTS header.|qod_type=remote_banner|solution_type=Workaround
+                  </code></pre>
+              <p>Newer plugins may place that same information in dedicated XML tags, like this:</p>
+              <pre><code class="xml">
+&lt;solution-type&gt;Workaround&lt;/solution-type&gt;
+                  </code></pre>
+              <p>Integrating the information in your security operations is also challenging due to the many different types of data. When a possible security incident is detected on your network, having the proper context for triaging it is crucial. You may want to correlate the incident details with OpenVAS information to get a richer context for analysis.</p>
+              <p>In larger networking environments multiple vulnerability scanners may be setup in various network segments. In that case it is useful to integrate the outputs of all scanners into a single consistent data set.
+              </p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Knowledge</h2>
+              <p>Now imagine that computers could read <i>and understand</i> OpenVAS scan reports like a security expert can. The machine would know where to find the various types of information, understand the significance of that information for your security operations, autonomously correlate the information to arbitrary other security data and reason about it.</p>
+              <p>This is what <a href="https://github.com/dtakken/openvas-edxml">the EDXML transcoder for OpenVAS</a> is intended for. While you can read all about EDXML <a href="https://edxml.org/">here</a>, in this post I will zoom in on this specific application and show how machines can learn about your network by reasoning about OpenVAS data.</p>
+              <p>EDXML enables transforming data into <a href="https://edxml.org/story-telling/">stories</a> that machines can read, similar to how humans read a novel. By integrating expert knowledge about the data into the data itself, machines can learn what the data is telling, simply by reading it. This expert knowledge can be visualized, showing how machines "think" about the data. This is what I intend do in this post. We all love pictures, right? First though, let us install the EDXML transcoder:</p>
+
+              <div class="my-4 termynal" data-termynal data-ty-typeDelay="40" data-ty-lineDelay="700" style="font-size: inherit">
+                <span data-ty="input">pip install openvas-edxml</span>
+                <span data-ty="progress"></span>
+                <span data-ty>Successfully installed openvas-edxml</span>
+              </div>
+
+              <p>What an EDXML transcoder does is take some kind of data as input (OpenVAS reports in this case), add expert knowledge to it and output the result as EDXML data. Besides generating EDXML transcoders can also express their knowledge as <a href="https://github.com/dtakken/openvas-edxml/blob/master/transcoder.rst">English text</a> and as pictures. Since I promised pictures we will focus on those.</p>
+              <p>Expert knowledge can be used to construct <i>inference pathways</i>, which are associative reasoning steps that machines can take to discover knowledge contained in the data set. We can view these pathways by asking the transcoder to dump its concept graph:</p>
+
+              <div class="my-4 termynal" data-termynal data-ty-typeDelay="40" data-ty-lineDelay="700" style="font-size: inherit">
+                <span data-ty="input">openvas-edxml --dump-concept-graph "concepts"</span>
+              </div>
+
+              <p>This results in a file named "concepts.png" being written. Let us have a look at the full picture first (click for high resolution version):</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <a class="mx-auto" href="../../assets/posts/openvas-knowledge/concepts-highres.png" target="_blank">
+                  <picture>
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts.png 1x, ../../assets/posts/openvas-knowledge/concepts-@2x.png 2x" type="image/png" media="(min-width: 1400px)">
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-smaller.png 1x, ../../assets/posts/openvas-knowledge/concepts-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-smallest.png 1x, ../../assets/posts/openvas-knowledge/concepts-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                    <img src="../../assets/posts/openvas-knowledge/concepts-smallest.png" type="image/png" alt="OpenVAS inference pathways">
+                  </picture>
+                </a>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>So, what are we looking at here? Well, in order to explain that we need to know some basics about EDXML concepts first.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Concepts</h2>
+              <p>As part of its expert knowledge an EDXML transcoder can define concepts. You can think of concepts as the characters in the story that the data is telling. The OpenVAS transcoder defines concepts like "computer", "certificate", "OpenVAS finding", and so on.</p>
+              <p>The thing with concepts is that their information is scattered about in various parts of the data. For example, one might define a "computer" concept which may have an IP address, an operating system and open ports. In EDXML we call these things <i>concept attributes</i>. The various attributes of a particular computer may be found by different OpenVAS plugins, ending up in different parts of the scan report. In order to obtain all available knowledge about a computer, this information needs to be correlated and combined somehow. This is what concepts are for. Concepts teach machines how to correlate bits of information from various places. </p>
+              <p>Let us take things one step further. Various types of concepts may be related to one another. For example, a computer may be related to a certificate that is installed on that computer. That certificate may be related to the organization that issued it. The organization may in turn be related to multiple other certificates issued by it.</p>
+              <p>As you can imagine there are thousands of ways to correlate OpenVAS data to itself, let alone to other types of security data. Which correlations are relevant depends on the use case. Rather than manually programming all of these correlations into applications, EDXML enables machines to learn to perform these correlations on their own, based on the expert knowledge contained in the data and the needs of the end user. It can literally find its way in the data.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Concept Mining</h2>
+              <p>Let us take a look at a detail from the full picture (again, click for high resolution version):</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <a class="mx-auto" href="../../assets/posts/openvas-knowledge/concepts-detail.png" target="_blank">
+                  <picture>
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-detail.png 1x, ../../assets/posts/openvas-knowledge/concepts-detail-@2x.png 2x" type="image/png" media="(min-width: 1400px)">
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-detail-smaller.png 1x, ../../assets/posts/openvas-knowledge/concepts-detail-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-detail-smallest.png 1x, ../../assets/posts/openvas-knowledge/concepts-detail-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                    <img src="../../assets/posts/openvas-knowledge/concepts-detail-smallest.png" type="image/png" alt="OpenVAS inference pathways (detail)">
+                  </picture>
+                </a>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Now let's talk about gray boxes. Why? Because gray boxes are interesting. The light gray boxes shown above are concept attributes. We see attributes like IP addresses and host names. Each attribute is associated with a specific concept, which is displayed right below the attribute name. We see concepts like "computer", "certificate" and "network router".</p>
+              <p>The attributes are connected by means of <i>concept relations</i>. Combined, these relations form a graph containing inference pathways. Machines can use relations to take small reasoning steps to associate one piece of information with another. For example, we can see a relation between an IP address and a host name, both attributes of the "computer" concept. This is an example of an <i>intra-concept</i> relation. Relations of this type, depicted as solid lines, expand the knowledge about a concept by associating with another attribute of the same concept. In this case a machine can use the relation to find the IP address of a computer given its host name or the other way around.</p>
+              <p>We can also see dotted lines, like the relation between a certificate fingerprint and an IP address. This is an example of an <i>inter-concept</i> relation. Rather than expanding knowledge about a concept, these relations associate one concept to another. Machines can use these to discover networks of related concepts.</p>
+              <p>This process of extracting concepts from EDXML data is called <a href="https://edxml.org/concept-mining/">concept mining</a>.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Reasoning</h2>
+              <p>So now we have seen what the inference pathways produced by the OpenVAS transcoder look like. In order to understand how these pathways are used to do the actual reasoning it is important to realize that the EDXML data itself does not look anything like a graph. The structure of EDXML data is actually really simple. It is made up of <i>events</i>, which are basically just sets of key / value pairs.</p>
+              <p>A transcoder may define multiple types of events. In this case, there is an event type representing an OpenVAS finding, an event type representing an operating system detection, and so on. The events are not explicitly related in any way. Only when the events are combined with the expert knowledge, which is contained in the same EDXML document as the events, the global structure is revealed.</p>
+              <p>The event type associates each event with expert knowledge. We can see this in the inference pathway visualizations. Each concept attribute specifies its associated event type, written at the bottom of the gray box. We see event types like "discovered SSL certificate" and "discovered router listing".</p>
+              <p>Now, given an EDXML event we can associate possible reasoning steps with it. For example, given a "discovered SSL certificate" event we can see that there is an inter-concept relation (dotted) between the "certificate fingerprint" and "IPv4 address" attributes of that type of event. This implies that the event contains information about a certificate and a computer and that these are related. This is an example of a reasoning step within the scope of a single event.</p>
+              <p>EDXML Concept Mining is an iterative process where the computer takes reasoning steps from a particular starting point. For example, we might specify an IP address as starting point and the computer may find an event containing that IP address. Then, by looking up the reasoning steps that have an IP address as starting point, it might associate a host name with the IP address. Then, the process repeats taking the discovered host name as a starting point, jumping from one piece of information to the next.</p>
+              <p>Reasoning steps can also jump from one event to another. For example, there may be many events that refer to the same IPv4 address, suggesting that these events may all provide information about a single host. In the inference pathways visualization this is represented by the blue circles. These circles are surrounded by concept attributes that share a common type of data. These are "reasoning hubs" that can be used to go from one event to another in search of more related information about a particular concept.</p>
+              <p>Let us take a look at another detail from the full picture:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <a class="mx-auto" href="../../assets/posts/openvas-knowledge/concepts-detail-hubs.png" target="_blank">
+                  <picture>
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-detail-hubs.png 1x, ../../assets/posts/openvas-knowledge/concepts-detail-hubs-@2x.png 2x" type="image/png" media="(min-width: 1400px)">
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-detail-hubs-smaller.png 1x, ../../assets/posts/openvas-knowledge/concepts-detail-hubs-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                    <source srcset="../../assets/posts/openvas-knowledge/concepts-detail-hubs-smallest.png 1x, ../../assets/posts/openvas-knowledge/concepts-detail-hubs-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                    <img src="../../assets/posts/openvas-knowledge/concepts-detail-hubs-smallest.png" type="image/png" alt="OpenVAS reasoning hubs (detail)">
+                  </picture>
+                </a>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>The above detail shows two reasoning hubs, one for IPv4 addresses and one for IPv6 addresses. As you can see, the hubs connect attributes from multiple event types. Note that the concepts of these attributes differ. For example, we can jump from the IPv4 address of a "computer" in one event to that same IPv4 address in another event where it belongs to a "network router". This is an example of a reasoning step that results in <i>concept specialization</i>. The reasoning step enables machines to use OpenVAS data to discover that a particular "computer" is actually a "network router".</p>
+              <p>When using the concept mining utility from the <a href="https://edxml.org/sdk/">EDXML SDK</a> on the output of the OpenVAS transcoder, we can see this in action. So, let us grab an OpenVAS XML report and use the transcoder to convert it into an EDXML document:</p>
+              <pre><code class="plaintext" style="white-space: pre-wrap">
+openvas-edxml --desc "My scan" --uri "/some/source/uri/" -f report.xml > report.edxml
+                  </code></pre>
+
+              <p>Now we take the EDXML document and mine it:</p>
+
+              <pre><code class="plaintext" style="white-space: pre-wrap">
+edxml-mine --tell -f report.xml
+                  </code></pre>
+
+              <p>On the terminal, we might see something like this scroll by:</p>
+
+              <pre><code class="plaintext">
+Found a computer: '10.32.0.1'
+Discovery: this computer is a network router.
+Found attribute: '10.32.0.1' (IPv4 address) runs 'cpe:/o:checkpoint:gaia_os' (CPE URI)
+Found attribute: '10.32.0.1' (IPv4 address) exposes '80/TCP' (open port)
+Found attribute: '10.32.0.1' (IPv4 address) exposes '443/TCP' (open port)
+              </code></pre>
+
+              <p>The process of associating pieces of related data to form an "image" of a particular concept is similar to the way humans put together jigsaw puzzles. This analogy is used to explain EDXML concept mining in more detail <a href="https://edxml.org/concept-mining/">here</a>. More in depth information about concept mining algorithms can be found <a href="../concept-mining/">in this post</a>.</p>
+
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Conclusion</h2>
+              <p>Hopefully I managed to get you a coarse idea of how machines can mine knowledge from OpenVAS data. The visualized inference pathways are a nice way to illustrate how this works. When developing EDXML transcoders generating a picture is also valuable. It is a great way to see the expert knowledge you put in and check for bugs. Because, while the <a href="https://edxml.org/sdk/">EDXML SDK</a> can check if your transcoder is valid, it cannot check if the expert knowledge makes any sense. That is up to the expert.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <aside>
+          <div class="row my-5 text-center">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="small">Copyright © Dik Takken</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="text-center small"><a href="../">back to posts</a></p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </aside>
+      </article>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dik Takken - Personal Blog">
+    <meta name="author" content="Dik Takken">
+
+    <title>Dik Takken - Personal Blog</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/mono-blue.min.css">
+    <link rel="stylesheet" href="../../assets/css/customizations.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+    <script src="../../assets/js/load-fonts.js"></script>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+        <div class="col-lg-10 bg-white column-center">
+          <div class="row menubar">
+            <div class="col-4"><a href="../../about">About</a></div>
+            <div class="col-4"><a href="../">Blog</a></div>
+            <div class="col-4"><a href="../../contact">Contact</a></div>
+          </div>
+          <div class="row title">
+            <div class="col-lg-1"></div>
+            <div class="col-sm-8">
+              <p>Personal<br/>Blog</p>
+            </div>
+            <div class="col-sm-2 d-none d-md-block d-lg-block d-xl-block">
+              <div class="row" style="height: 3em">
+                <img src="../../assets/images/dik-bw-circular.png" class="mx-auto my-auto h-50" alt=""></div>
+            </div>
+            <div class="col-lg-1"></div>
+          </div>
+        </div>
+        <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1 d-none d-lg-block d-xl-block column-left">
+        </div>
+        <article class="col-lg-10 bg-white column-center">
+          <div class="row my-b">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>/<a class="mx-2" href="../../">home</a>/<a class="mx-2" href="../">blog</a>/<a class="mx-2" href=".">joys-of-templates</a></p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row text-center my-5 ">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-9">
+              <h1 class="mx-auto my-auto">On the Joys of Templates</h1>
+            </div>
+            <div class="col-lg-2"></div>
+          </div>
+          <section>
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="initial col-sm-9">
+                <h2>How it Started</h2>
+                <p>For a project I was asked to replace a procedural document generator with one based on templates. The rationale was that templates are simpler, more flexible and the end users can edit them to their liking instead of requiring the help of developers to do that. And yes, templates are completely <i>en vogue</i> these days.</p>
+
+                <p>I had a bad feeling about migrating to templates right from the start. Unfortunately I did not have the arguments at hand to question the decision. Now, after the whole experience, I do, and I wanted to share them here.</p>
+
+                <p>The sweet spot for templates is static documents, like forms. The computer will fill in the blanks and there you have your document. Great. The problem is what happens next. You send your generated document to the stakeholder, who gets back to you saying: "Good job! My team gathered some feedback, and we want to make some parts of the template optional depending on... several things. Should be easy to add that, right?".</p>
+
+                <h2>What Happened Next</h2>
+
+                <p>Over time, templates tend to get more complex and dynamic, not less. No worries through, templating engines are crazy powerful these days. They allow going down the path away from static documents a long, long way. Soon, our Microsoft Word templates contained for loops, if-else constructs crammed in table cells and all of that mixed with regular document content and styling. Mixing code with styling. Code in a document. Wait a minute, do I still have syntax checking now? Nope. Or line numbers to locate a problem in a template? In your dreams.</p>
+
+                <p>At some point, we reached the limits of what our templating language could reasonably do. At this point, we entered another stage. Things went from painful to obnoxious. What happened now is that document content, which could no longer be generated in the template itself, was moved into application code. The application generated the document content procedurally while the document only contained a placeholder for the generated content. Now, just consider where we have ended up. Application code has moved into the document while document content has moved into application code.</p>
+
+                <p>While code and content are now in places where they should not be, responsibilities of developers and stakeholders got mixed up. We started out by delegating maintenance of the templates (Word documents) to the stakeholders. This is in itself a good idea. The stakeholders are comfortable editing Word documents, not code. The developers are comfortable editing code, Word documents scare them.</p>
+
+                <h2>How it Ended</h2>
+
+                <p>In the end, the developers found their code moved from their favourite code editors into Word documents. Microsoft Word is an environment they rather avoid for code authoring because it offers no syntax checking or debugging options. At the same time the stakeholders backed off from touching the templates, afraid to break the code contained in it. So now the developers had become responsible for maintaining code contained in Word documents as well as maintaining the document content and layout mixed into their code. In my opinion, that is not a great situation to be in.</p>
+
+                <p>One small anecdote to top it off. At one time I was faced with a bug in the template. The renderer said the template contained a variable for which I did not specify a value. I was pretty sure I did. It took me hours to figure out what was going on. In the end, I figured it out. In the Word document, the variable was part of a section title. The title was styled such that it was displayed in capitals, even while the text itself was part lower case and part upper case. Any differences between upper case and lower case characters becomes invisible. As it turned out, the variable had a lower case character that should have been upper case. Go figure...</p>
+
+                <p>I do understand why templates are attractive. However, great care should be taken when applying them to anything but form-like documents. For non-trivial documents, or documents that could advance over time, think twice.</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+          </section>
+          <aside>
+            <div class="row my-5 text-center">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p class="small">Copyright © Dik Takken</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row my-5">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p class="text-center small"><a href="../">back to posts</a></p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+          </aside>
+        </article>
+        <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+      </div>
+    </div>
+  </body>
+</html>

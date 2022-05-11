@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dik Takken - Personal Blog">
+  <meta name="author" content="Dik Takken">
+
+  <title>Dik Takken - Personal Blog</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/mono-blue.min.css">
+  <link rel="stylesheet" href="../../assets/css/customizations.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+  <script src="../../assets/js/load-fonts.js"></script>
+  <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+      crossorigin="anonymous">
+  </script>
+  <script src="../../assets/js/termynal.js"></script>
+  <script src="../../assets/js/jquery.appear.js"></script>
+  <script src="../../assets/js/load-termynal.js"></script>
+  <link rel="stylesheet" href="../../assets/css/termynal.css">
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row menubar">
+        <div class="col-4"><a href="../../about">About</a></div>
+        <div class="col-4"><a href="../">Blog</a></div>
+        <div class="col-4"><a href="../../contact">Contact</a></div>
+      </div>
+      <div class="row title">
+        <div class="col-lg-1"></div>
+        <div class="col-sm-8">
+          <p>Personal<br/>Blog</p>
+        </div>
+        <div class="col-sm-2 d-none d-md-block d-lg-block d-xl-block">
+          <div class="row" style="height: 3em">
+            <img src="../../assets/images/dik-bw-circular.png" class="mx-auto my-auto h-50" alt=""></div>
+        </div>
+        <div class="col-lg-1"></div>
+      </div>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row my-b">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-9">
+          <p>/<a class="mx-2" href="../../">home</a>/<a class="mx-2" href="../">blog</a>/<a class="mx-2" href=".">concept-mining</a></p>
+        </div>
+        <div class="col-sm-2"></div>
+      </div>
+      <article>
+        <div class="row text-center my-5 ">
+          <div class="col-lg-1"></div>
+          <div class="col-lg-9">
+            <h1 class="mx-auto my-auto">Ingredients for a Concept Mining Algorithm</h1>
+          </div>
+          <div class="col-lg-2"></div>
+        </div>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>In this post I will sketch the various ingredients needed for an EDXML concept mining algorithm and show how these fit together. Concept mining in EDXML is a simple form of machine reasoning that is inspired on how human data analysts extract knowledge from data. You can read all about it <a href="https://edxml.org/concept-mining/">here</a>.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="initial col-sm-9">
+              <h2>Basics</h2>
+
+              <p>Before we set off, let us establish some basic principles and terminology. An EDXML data set may define any number of <i>concepts</i>. In the <a href="https://edxml.org/story-telling/">story telling analogy</a>, concepts are the characters that play a role in the story that the data is telling. Concepts are the things that the data set is about, like persons, locations, computers, and so on. A <i>concept instance</i> is a specific character, like a specific person for instance. The goal of concept mining is to extract knowledge about a particular concept instance. It is like reading a novel and writing down all properties of a specific character that are revealed throughout the book.</p>
+
+              <p>This knowledge consists of <i>concept attributes</i>. A concept attribute is a value of a specific event property that is associated with a particular concept. A possible concept attribute might be the name of a person.</p>
+
+              <p>For devising a concept mining algorithm it is useful to consider the EDXML data set as a graph where the nodes are all the concept attributes that exist in the data set. The edges that connect them represent possible associative reasoning steps to get from one concept attribute to another. One of the nodes is chosen to be the <i>seed</i>. The task of the mining algorithm is to "grow" a concept instance around the seed by finding all concept attributes that can be reached from it.</p>
+
+              <p>It is important to note that these edges are implicit in EDXML. Individual events do not contain any definitions of relations between their own object values, or the object values of other events. Edges can be inferred by combining events with their event type definitions. This will be explained in the next section.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Reasoning Steps</h2>
+              <p>There are two possible reasoning steps that an algorithm should consider. Either it can use a property relation to step to related objects within the same event. Or it can step to the same object inside another event. Both are illustrated below.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <img class="w-100" src="../../assets/posts/concept-mining/reasoning-steps.svg" alt="">
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Here we see events (indicated as 'E' in red), their properties (indicated as 'P' in blue), their associated concepts (indicated as 'C' in grey) and event objects (indicated as 'O' in green). On the left we see reasoning within a single event. It steps from an object to its associated property. Its event type defines a property relation, which allows stepping to the related property, and from there to the object of that property. On the right we see reasoning across events. It steps from an object of one event to the same object in the context of another event.</p>
+
+              <p>EDXML has the notion of <i>shared objects</i>. Shared objects are values of a particular object type that occur in multiple events. The events sharing it are implicitly related through this shared object. Each event in which the shared object occurs provides a different context for that object. In each context it may have a different meaning.</p>
+
+              <p>Suppose that we are mining a computer, and we know its IP address. And suppose that, while mining, we encounter an event and find this same IP address in it. Does that instance of the IP address also belong to the concept that we are mining? Well, it depends.</p>
+
+              <p>Suppose that this newly found event does not associate the IP address with a computer but with, say, a DNS record. In that case, it does not belong to our concept instance, because we are mining a computer, not a DNS record. So, the reasoning step to jump into that DNS record event should not be made. The fact that the same object may or may not be associated with the same concept is an important thing to realise when designing a concept mining algorithm. It means that each occurrence of a shared object must be considered separately.</p>
+
+              <p>As we have just seen, when considering if a particular reasoning step between two concept attributes should be taken or not it is necessary to check if the target attribute is associated with the same concept as the concept instance that we are mining. Here, the following question arises: When should two concepts be considered the same? To answer that question we need to remember the fact that EDXML concepts form a hierarchy. Some concepts can be really generic, like '<code>machine</code>'. Others may be more specific, like '<code>machine.computer.laptop</code>'.</p>
+
+              <p>Suppose that we are mining a concept instance representing a '<code>computer</code>' and we know its IP address. If we find that same IP address in another event where it is associated with '<code>computer.laptop</code>', what does that mean? Yes, these are different concepts. But both may very well refer to the same thing. If, for the purpose of this example, we assume that IP addresses are unique identifiers for both concepts, then we can say that we discovered that this '<code>computer</code>' is actually a '<code>computer.laptop</code>'.</p>
+
+              <p>This illustrates that, when two instances of a particular object are associated with different concepts, it may still make sense to include both in the mined concept instance. Here we identified another key design parameter for a concept mining algorithm: We need to establish the rules for relating attributes that are associated with different concepts.</p>
+
+              <p>The EDXML specification explains that the '<code>computer.laptop</code>' concept is a <i>specialization</i> of the '<code>computer</code>' concept, while the '<code>computer</code>' concept is a <i>generalization</i> of the '<code>computer.laptop</code>' concept. As a counterexample, the concepts '<code>computer.laptop</code>' and '<code>computer.smartphone</code>' do not have this relation because both are <i>different</i> specializations of the same root concept. Both are computers, but instances of the concept are either laptops or smartphones. Therefore, it makes sense not to take any reasoning steps that mix object instances associated with unrelated concepts. More precise: Given two instances of a shared object A and B, where A is already part of the mined concept instance, then B should only be included when the concepts associated with A and B have a specialization / generalization relation.</p>
+
+              <p>Up until this point we have considered reasoning steps across events. Let us now consider the other type of reasoning step: A reasoning step that associates two related objects <i>within a single event</i>. Now, things are quite different. An intra-concept relation may explicitly relate objects that are associated with any two concepts, no matter how much they differ. It may even relate concepts '<code>human</code>' and '<code>fly</code>', causing concept attributes of both humans and flies to coexist in a single concept instance.</p>
+
+              <p>Why is it possible to create such monstrosities? The EDXML specification permits this because one kind of thing may actually be viewed differently in different contexts. A knife may be seen as a tool, a weapon or a product. An intra-concept relation provides a means for an EDXML event type designer to explicitly tell a concept mining algorithm that two different concepts may actually refer to the same thing. That allows the concept mining process to safely combine attributes from concepts into a single concept instance, even if no specialization / generalization relation exists. It will trust the event type designer.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Object Hubs</h2>
+
+              <p>We have explored some properties of the reasoning steps that form the edges in our reasoning graph. Of these edges, the ones that interconnect all the instances of a particular shared event object require some additional consideration. Given any of the nodes that represent instances of a particular shared object, the graph should provide a path to all other instances. Here, practical difficulties may arise. Mutually connecting <i>n</i> nodes requires approximately (<i>n</i> * <i>n</i>) / 2 bidirectional edges. The number of edges increases quadratically as the number of events referring to a shared object increases. This quickly becomes impractical for larger data sets.</p>
+
+              <p>This issue can be solved by introducing <i>object hubs</i>. An object hub is a special kind of node that represents a shared object. When all instances of a given shared object have an edge connecting them to their object hub, they are still mutually connected. Only this time, the number of required edges equals the number of instances of the shared object. The difference is illustrated below.</p>
+            </div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <img class="w-100" src="../../assets/posts/concept-mining/object-hubs.svg" alt="">
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>On the left we see five events (indicated 'E' in red) each having an instance of one shared object (indicated 'O' in green). Each instance of the shared object is connected to all other instances using 10 edges. To the right we see the same configuration where an object hub has been added (indicated 'H' in green). The object instances are connected to the hub using 5 edges.</p>
+            </div>
+          </div>
+          <div class="col-sm-2"></div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Confidence</h2>
+
+              <p>Real world data can be inaccurate, inconsistent or just plain wrong. This can be expressed in EDXML by means of confidences. For example, a property relation has a certain confidence which indicates a gross estimate of the odds that the relation actually exists. Confidence plays a key role in concept mining. Every associative reasoning step has a certain risk of incorrectly adding a concept attribute to the concept being mined. Every iteration of the mining process takes it farther from the initial seed and confidence of newly added attributes decreases. In practise, it makes sense to use a confidence cutoff to create a boundary for mined concept instances. This requires that the algorithm keeps track of how confidence propagates through the graph while reasoning.</p>
+
+              <p>There is one important detail to consider when tracking confidence: There may be multiple reasoning paths that lead to the same node. In order to obtain concept instances with good overall confidence it makes sense to choose the line of reasoning that has the lowest risk of error. This can be established by using <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra's algorithm</a> for finding the shortest path to a particular node in a graph.</p>
+
+              <p>There may be many nodes in the graph that represent the same concept attribute. As a result, the nodes that are found to belong to a single concept instance may include multiple instances of a single attribute. Each of them may have a different confidence. How should we interpret this?</p>
+
+              <p>Let us return to the story telling analogy once more. In this analogy, EDXML events are similar to the paragraphs in a novel. There may be many paragraphs that tell the same thing about a character. For example, one paragraph might feature a character telling about a car, possibly a blue one. And in another paragraph, another character is telling about the same car, noting that it was almost surely a blue car. Two observations of the same concept attribute, having different confidences. The combination of the two observations gives us more confidence about the color of the car than either of the two observations do on their own.</p>
+
+              <p>Confidence of concept attributes may be regarded in the same way. When multiple nodes confirm the same attribute with varying confidences, basic probability calculus may be used to compute the net confidence of the attribute.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Conclusion</h2>
+              <p>We have identified a number of ingredients for a concept mining algorithm. These include the following:</p>
+              <ul>
+                <li>Iterative reasoning on a graph</li>
+                <li>Use of shared object hubs</li>
+                <li>Consider the concept associated with a node to decide about adding it to the concept instance</li>
+                <li>Propagate confidence while reasoning</li>
+                <li>Find the best line of reason using Dijkstra's algorithm</li>
+              </ul>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <aside>
+          <div class="row my-5 text-center">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="small">Copyright © Dik Takken</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="text-center small"><a href="../">back to posts</a></p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </aside>
+      </article>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+</div>
+</body>
+</html>

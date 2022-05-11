@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dik Takken - Personal Blog">
+    <meta name="author" content="Dik Takken">
+
+    <title>Dik Takken - Personal Blog</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/mono-blue.min.css">
+    <link rel="stylesheet" href="../../assets/css/customizations.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+    <script src="../../assets/js/load-fonts.js"></script>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+        <div class="col-lg-10 bg-white column-center">
+          <div class="row menubar">
+            <div class="col-4"><a href="../../about">About</a></div>
+            <div class="col-4"><a href="../">Blog</a></div>
+            <div class="col-4"><a href="../../contact">Contact</a></div>
+          </div>
+          <div class="row title">
+            <div class="col-lg-1"></div>
+            <div class="col-sm-8">
+              <p>Personal<br/>Blog</p>
+            </div>
+            <div class="col-sm-2 d-none d-md-block d-lg-block d-xl-block">
+              <div class="row" style="height: 3em">
+                <img src="../../assets/images/dik-bw-circular.png" class="mx-auto my-auto h-50" alt=""></div>
+            </div>
+            <div class="col-lg-1"></div>
+          </div>
+        </div>
+        <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1 d-none d-lg-block d-xl-block column-left">
+        </div>
+        <article class="col-lg-10 bg-white column-center">
+          <div class="row my-b">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>/<a class="mx-2" href="../../">home</a>/<a class="mx-2" href="../">blog</a>/<a class="mx-2" href=".">forum-plotter</a></p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row text-center my-5 ">
+            <div class="col-lg-1"></div>
+            <div class="col-lg-9">
+              <h1 class="mx-auto my-auto">The DNA of an Internet Forum</h1>
+            </div>
+            <div class="col-lg-2"></div>
+          </div>
+          <section>
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="initial col-sm-9">
+                <p>In my job I constantly find myself confronted with huge volumes of data that I need to quickly familiarize myself with. Occasionally I come across internet forums. Quickly getting an idea of the content of such a forum can be challenging. There may be tens of thousands of messages spanning hundreds of subjects. Sometimes the messages are in Russian. No, in Russian slang. No, in Russian slang in cyrillic script mixed with some cyrillic that is actually phonetic English with an odd accent. You get the picture? I have seen seasoned, native speaking translators staring at the messages in utter confusion.</p>
+                <p>Besides the subject there are other questions to be answered. Who are the members of the forum? Who is discussing what subject? Are there any key members that often jointly discuss certain things? A reading guide of some sort would be nice.</p>
+                <h2>Circos</h2>
+                <p>Recently I came across a visualization tool for genome sequences called <a href="http://circos.ca">Circos</a>. This tool is used by bioinformatics scientists to visualize genomic data and compare particular sequences. It can show vast quantities of data in a way that eases visual discovery of patterns and relations. Technically, it is similar to <a href="https://graphviz.org/">GraphViz</a>, which is another favourite tool of mine. Just generate a set of simple text files containing the data that you wish to show. Then run the tool, and it outputs a nice SVG graphic for you.</p>
+                <p>Seeing this tool I started thinking about visualizing the DNA of an internet forum. After toying with it for a day and a half the following picture appeared on my screen:</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row my-5">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <img class="w-100" src="../../assets/posts/forum-plotter/forum-plotter-2.png" alt="">
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p>No, this is not a Hubble Space Telescope image of a distant galaxy. This is what the structure of a fairly large internet forum can look like.</p>
+            </div>
+            <div class="col-sm-2"></div>
+            </div>
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <h2>Structure</h2>
+                <p>But what are we seeing here exactly? Let us zoom in a bit more to see its structure:</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row my-5">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <img class="w-100" src="../../assets/posts/forum-plotter/forum-plotter-3.png" alt="">
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p>The image is constructed around a circle that has been divided into two halves. The left half shows the names of some forum members, the right half shows titles of sub-forums that are dedicated to a particular subject. In case you were wondering: Indeed these are not real names and titles. I used some dummy data here.</p>
+                <p>The ticks on both halves count messages. Each forum message is shown twice. Once on the left side, grouped by the member who posted it. And then once more on the right, grouped by the sub-forum in which it appears. Within a single group representing a forum member the messages are sorted on the time when they were posted. Within a sub-forum the messages are ordered by the threads in which they appear.</p>
+                <h2>The Magic</h2>
+                <p>The magic happens when we use colored lines to connect the same message on both sides. This yields colorful "beams" that show the focus of a particular member on specific subjects. We can also see when focus shifts over time. A detail of these beams, slightly rotated, is shown below:</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row my-5">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <img class="w-100" src="../../assets/posts/forum-plotter/forum-plotter-4.png" alt="">
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p>I will immediately admit that I show this detail just because it's so pretty. Up close the line patterns look like <a href="https://www.nasa.gov/mission_pages/cassini/media/cassini-072104.html">the rings of Saturn</a>. Now imagine what happens when animating this image by using a sliding time window to filter the data set. Unfortunately I managed to resist the urge to actually generate an animation. Just use your imagination!</p>
+                <h2>Tile Track</h2>
+                <p>Circos features various types of <i>data tracks</i> that can be added as rings on either the inner or outer side of the circle. I used a so-called tile track to add some more detail to the visualization. You can see it below in between the ticks track and the label track:</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row my-5">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <img class="w-100" src="../../assets/posts/forum-plotter/forum-plotter-1.png" alt="">
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p>The tile track shows colored tiles stacked on top of one another. The colors match the colors of the members on the left half. Each tile covers a single thread and shows which of the members have posted in that thread. When multiple members posted in the same thread the tiles stack up. This shows which of the members frequently "meet" in a thread and which threads contain discussions among the displayed members. Depending on how you choose which members to include in the graphic these may be interesting threads to start exploring the forum.</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row my-5">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p class="text-center"><i>This post was originally not written in this exact form. It originates from personal notes that have been redacted in order to make them suitable for publication.</i></p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+          </section>
+          <aside>
+            <div class="row my-5 text-center">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p class="small">Copyright © Dik Takken</p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row my-5">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-9">
+                <p class="text-center small"><a href="../">back to posts</a></p>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+          </aside>
+        </article>
+        <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dik Takken - Personal Blog">
+  <meta name="author" content="Dik Takken">
+
+  <title>Dik Takken - Personal Blog</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/mono-blue.min.css">
+  <link rel="stylesheet" href="../../assets/css/customizations.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+  <script src="../../assets/js/load-fonts.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row menubar">
+        <div class="col-4"><a href="../../about">About</a></div>
+        <div class="col-4"><a href="../">Blog</a></div>
+        <div class="col-4"><a href="../../contact">Contact</a></div>
+      </div>
+      <div class="row title">
+        <div class="col-lg-1"></div>
+        <div class="col-sm-8">
+          <p>Personal<br/>Blog</p>
+        </div>
+        <div class="col-sm-2 d-none d-md-block d-lg-block d-xl-block">
+          <div class="row" style="height: 3em">
+            <img src="../../assets/images/dik-bw-circular.png" class="mx-auto my-auto h-50" alt=""></div>
+        </div>
+        <div class="col-lg-1"></div>
+      </div>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row my-b">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-9">
+          <p>/<a class="mx-2" href="../../">home</a>/<a class="mx-2" href="../">blog</a>/<a class="mx-2" href=".">start-hacking-php-runtime</a></p>
+        </div>
+        <div class="col-sm-2"></div>
+      </div>
+      <article>
+        <div class="row my-5 ">
+          <div class="col-lg-1"></div>
+          <div class="col-lg-6 text-center">
+            <p class="my-3 large">getting started</p>
+            <h1 class="mx-auto my-auto">Hacking the PHP Runtime System</h1>
+          </div>
+          <div class="col-lg-3 ml-5">
+            <div class="row" style="height: 40ex">
+              <img class="h-50 mx-auto my-auto" src="../../assets/posts/start-hacking-php-runtime/php.png" alt="">
+            </div>
+          </div>
+          <div class="col-lg-2"></div>
+        </div>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="initial col-sm-9">
+              <p>First things first. Working on the PHP runtime system is not for the faint of heart. It consists of a large body of highly optimized C and assembly code, enlightening comments are usually scarce, and you may even come across variable names in Hebrew (ok, just one, but still). Also, virtual machines and compilers are not trivial technologies. So why bother getting into this stuff? Well, there's reasons. Here are some to choose from:</p>
+                <ul>
+                  <li>You like a good challenge once in a while</li>
+                  <li>You are a PHP coder and want to improve the language</li>
+                  <li>You like a small informal developer community that you can learn from</li>
+                </ul>
+              <p>Every developer has their own list of wishes for the languages that they use. I'm sure you do, too. PHP is developed by a small group of mostly spare time coders. It is quite easy to get involved. Anyone can pitch an idea, write an <a href="https://wiki.php.net/rfc">RFC</a> and bring it to a vote.</p>
+
+              <p>To get a sense of what the community is like I can highly recommend joining the <a href="https://www.php.net/mailing-lists.php">internals mailing list</a>, lurk around for a while and gradually start participating in conversations.</p>
+              <p>In this post I will try to give some pointers to get started, nothing more and nothing less. You will see how to compile the source code, run it and debug it using an IDE (CLion). I will show you where to find the most important components that you will want to tinker with and how to start exploring from there. An explanation of some obscure internals slang used in the code should help you start making sense of it all.</p>
+              <p>In spite of my efforts an Alice in Wonderland experience is probably unavoidable. Just make that add to the fun!</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>CLion setup</h2>
+              <div class="row">
+                <div class="col-md-8">
+                  <p>Ultimately, improving the language likely requires writing some C code. This is probably the most intimidating thing to get started with. So my suggestion would be to be brave and create a local check out of the <a href="https://github.com/php/php-src">Git repository</a> now:</p>
+                </div>
+                <div class="col-md-4 d-none d-md-block d-lg-block d-xl-block">
+                  <div class="row" style="">
+                    <img class="w-50 mx-auto my-auto" src="../../assets/posts/start-hacking-php-runtime/clion-logo.png" alt="">
+                  </div>
+                </div>
+              </div>
+
+              <pre><code class="shell">
+git clone https://github.com/php/php-src
+              </code></pre>
+
+              <p>There, you just took your first step! Now we need to do something with that code. Personally I like a good IDE. In this post I will use <a href="https://www.jetbrains.com/clion">CLion</a>, which is my favourite IDE for C coding. This IDE is not free, but it is inexpensive, well worth the money, and you can try it for a full month before deciding to purchase it. So, go ahead and install it. On a Debian based machine, this can be done using Snap:</p>
+
+              <pre><code class="shell">
+snap install --classic clion
+              </code></pre>
+
+              <p>Did I mention you might need some basic C and compiler development tooling as well? Be sure to install those too:</p>
+
+              <pre><code class="shell">
+apt-get install pkg-config build-essential autoconf automake libtool gdb \
+                bison re2c
+              </code></pre>
+
+              <p>CLion mostly targets cmake projects. Unfortunately the PHP runtime is still makefile based. This means that we need to deviate a little from the regular CLion setup. Makefile projects are supported, but it is difficult for an IDE to figure out the structure of such projects automatically. As a result CLion will have trouble analysing the source code and many of its smart features will not work.</p>
+
+              <p>The solution to this problem is to create a <i>compilation database</i>. A compilation database is a JSON file that contains information about the structure of the code base and how to compile it. We will generate one before we create a project in CLion. This is done using a Python tool called compiledb. We can use Pip to install it, like this:</p>
+
+              <pre><code class="shell">
+pip install compiledb
+              </code></pre>
+
+              <p>This little tool can intercept the compile commands run by the make files. Instead of running make directly, we have compiledb run it:</p>
+
+              <pre><code class="shell">
+compiledb make
+              </code></pre>
+
+              <p>So we will make sure to fully compile the PHP runtime using compiledb first. Compilation requires some development packages which can be installed using:</p>
+              <pre><code class="shell">
+apt-get install libxml2-dev libsqlite3-dev
+              </code></pre>
+              <p>Now, the basic procedure is pretty standard:</p>
+
+              <pre><code class="shell">
+./buildconf
+./configure --enable-debug
+compiledb make
+              </code></pre>
+
+              <p>Note the use of the <code>--enable-debug</code> flag to obtain a build that is suitable for development. When compilation is done, you will find a file called compile_commands.json in the root of the source distribution. This is the compilation database we need.</p>
+
+              <p>Now we can open the compilation database in CLion. Just choose "Open" from the File menu and point it at the compilation database:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-import-db.png 1x" type="image/png" media="(min-width: 800px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-import-db-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-import-db-smaller-@2x.png 2x" type="image/png" media="(max-width: 800px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-import-db-smaller.png" type="image/png" alt="Importing a compilation database in CLion">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Next, choose to open the database as a project, not as a file. After opening, CLion will show the README and start analysing the code:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-imported.png 1x" type="image/png" media="(min-width: 1400px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-imported-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-imported-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-imported-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-imported-smallest@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-imported-smallest.png" type="image/png" alt="CLion showing imported PHP sources">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>The screenshots here are from CLion 2021.1. Note the console message about the compilation database being imported. That is your confirmation of success. Code analysis will take a couple of minutes to complete before all the code inspection goodness kicks in.
+              </p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Running and Debugging</h2>
+              <p>Now that we are fully set up for code editing, let us continue to our next goal: Using CLion to run the PHP CLI. This requires that we create a run configuration in CLion. In the toolbar at the top of the window, click <i>Add Configuration...</i>. The resulting dialog looks like this:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-add-run-config.png 1x" type="image/png" media="(min-width: 1400px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-add-run-config-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-add-run-config-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-add-run-config-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-add-run-config-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-add-run-config-smallest.png" type="image/png" alt="Clion add run configuration dialog">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Click <i>Add new...</i> and choose <i>Makefile Application</i>. In the configuration dialog we need to provide some details. First of all, it needs a Target. A Target tells CLion how to build the executable. The dropdown here is most likely to be empty, so click the gears to create a new one. A new dialog appears, titled <i>Custom Build Targets</i>. Click the <b>+</b> icon to create a new target and give it a name. The dialog looks like this:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-build-target.png 1x" type="image/png" media="(min-width: 1400px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-build-target-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-build-target-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-build-target-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-build-target-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-build-target-smallest.png" type="image/png" alt="Clion build target dialog">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>At the very least we need to specify the Build tool here. Again, the Build tool drop down will most likely be empty. Click the button on the right to define one. Yet another dialog appears titled <i>External Tools</i>:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-external-tools.png 1x" type="image/png" media="(min-width: 800px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-external-tools-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-external-tools-smaller-@2x.png 2x" type="image/png" media="(max-width: 800px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-external-tools-smaller.png" type="image/png" alt="Clion external tools dialog">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Click the <b>+</b> button to create a new tool. Believe it or not, yet another dialog appears. This dialog allows us to specify the command and command arguments to run in order to build the application. After filling in the required information the result should look like this:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-edit-tool.png 1x" type="image/png" media="(min-width: 1000px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-edit-tool-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-edit-tool-smaller-@2x.png 2x" type="image/png" media="(max-width: 1000px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-edit-tool-smaller.png" type="image/png" alt="Clion configure build tool dialog">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>As you can see we chose to run make through compiledb, just as we did manually. This ensures that the compilation database is kept up to date as changes are made to the code base. Confirm to close the dialogs until you get back to the Run Configuration dialog. Here we specify the location of the PHP CLI executable. When that is done the dialog should look like this:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-config-finished.png 1x" type="image/png" media="(min-width: 1200px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-config-finished-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-config-finished-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-config-finished-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-config-finished-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-run-config-finished-smallest.png" type="image/png" alt="Clion run configuration completed">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Note that we specified the <code>--version</code> argument. This causes the PHP CLI to print version info and exit rather than waiting for input. Click OK to close the dialog. In the main CLion window we can now see our new run configuration in the drop down and both the run and debug buttons light up green:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-toolbar-run-local.png 1x" type="image/png" media="(min-width: 1200px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-toolbar-run-local-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-toolbar-run-local-smaller-@2x.png 2x" type="image/png" media="(max-width: 1200px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-toolbar-run-local-smaller.png" type="image/png" alt="Clion toolbar">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Pressing the run button should now run make to compile the PHP CLI and run it. The terminal output then shows the result:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run.png 1x" type="image/png" media="(min-width: 1400px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-run-smallest.png" type="image/png" alt="Running PHP CLI in Clion">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>The next thing to try is running through GDB and triggering a break point. The entry point of the PHP CLI, which is the main() function in sapi/cli/php_cli.c, is a good place to set a break point by clicking in the gutter of the editor. Now, when we hit the debug button we can see that the break point is triggered:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-trigger-breakpoint.png 1x" type="image/png" media="(min-width: 1400px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-trigger-breakpoint-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-trigger-breakpoint-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-trigger-breakpoint-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-trigger-breakpoint-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-trigger-breakpoint-smallest.png" type="image/png" alt="CLion showing a triggered breakpoint">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Remote Debugging</h2>
+              <p>Why would anyone need remote debugging when working on the PHP runtime on their local computer? The answer: Docker.</p>
+              <p>There are various advantages to keeping your build environment (compiler, build dependencies, ...) in a Docker container. You can set up a Docker container exactly as you need it to be without messing with your desktop operating system. Also, you can use multiple Docker containers with different Linux distributions and library versions installed, which is great for testing. And you get all of that at a tiny fraction of the resource cost of a traditional virtual machine.</p>
+
+              <p>But using Docker has disadvantages too: The executable is no longer running on the same logical machine as your IDE. This is why we will also take a look at setting up remote debugging.</p>
+
+              <p>To set up remote debugging, make sure your container has <code>gdbserver</code> installed. On Debian based containers this is as simple as adding</p>
+
+              <pre><code class="shell">
+RUN apt-get install -y gdbserver
+              </code></pre>
+
+              <p>to your Dockerfile. Initiating a debug session for the PHP CLI should now be done from outside the IDE. You need to run the executable first, using gdbserver. This will cause gdbserver to pause the executable until a debugging client like CLion connects to it. Having your container run the executable can be done by issuing a command similar to:</p>
+
+              <pre><code class="shell">
+docker run -ti --rm --net host \
+           -v $PWD:/$PWD \
+           --security-opt seccomp=unconfined \
+           php-dev gdbserver --multi 127.0.0.1:7000 $PWD/sapi/cli/php --version
+              </code></pre>
+
+              <p>Here we assumed that the command is issued from the root of the PHP source. We also made sure that the container is bound to the local host, which simplifies connecting to gdbserver from CLion. We added a security option to allow GDB to disable address randomization for easier debugging.</p>
+
+              <p>Note that we map the local source code directory to the exact same path inside the container. This is needed because when GDB notifies CLion about a breakpoint being triggered, it will send the path to the file along with it. When the GDB process inside the container has the source code in a different location than CLion does, then CLion fails to correlate the GDB message to the correct source code file. So we need to make sure that the source code files inside and outside the container have identical paths.</p>
+              <p>There is one more detail to take into account. The path information is baked into the executable <i>during compilation</i>. That means we also need to make sure that configuring and compiling PHP is done with matching paths. If you do not get this right, your break points will not trigger.</p>
+              <p>Now, running the container shows gdbserver waiting for connections on port 7000:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-gdbserver.png 1x" type="image/png" media="(min-width: 1400px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-gdbserver-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-gdbserver-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-gdbserver-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-gdbserver-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-run-gdbserver-smallest.png" type="image/png" alt="GDB waiting to connect">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>The next step is to tell CLion to connect to gdbserver. We can do that by adding a Run Configuration. From the Run Configurations dropdown in the main toolbar click <i>Edit Configurations</i>. In the dialog that pops up choose to create a <i>GDB Remote Debug</i> configuration. Then, choose <code>127.0.0.1:7000</code> as the remote and select the PHP CLI as the symbol file. When that is done, your dialog should look like this:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-debug.png 1x" type="image/png" media="(min-width: 1400px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-debug-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-debug-smaller-@2x.png 2x" type="image/png" media="(min-width: 700px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-run-debug-smallest.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-run-debug-smallest-@2x.png 2x" type="image/png" media="(max-width: 700px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-run-debug-smallest.png" type="image/png" alt="CLion GDB remote debugging configuration">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p>Give the configuration an appropriate name and click OK to confirm. Now, with gdbserver waiting for a connection in the background, we can start the remote debug run configuration in CLion. If all is well, this should trigger the breakpoint that we placed in <code>main()</code>. In case you removed that breakpoint again, you will just see CLion connect and immediately disconnect in its debug console:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <div class="row">
+                <picture class="mx-auto">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-gdbserver-connect.png 1x" type="image/png" media="(min-width: 1100px)">
+                  <source srcset="../../assets/posts/start-hacking-php-runtime/clion-gdbserver-connect-smaller.png 1x, ../../assets/posts/start-hacking-php-runtime/clion-gdbserver-connect-smaller-@2x.png 2x" type="image/png" media="(max-width: 1100px)">
+                  <img src="../../assets/posts/start-hacking-php-runtime/clion-gdbserver-connect-smaller.png" type="image/png" alt="CLion GDB connecting and disconnecting">
+                </picture>
+              </div>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Getting to Know the Code</h2>
+              <p>Now that we are fully set up for coding, <i>let's get started!</i></p>
+              <p>Not so fast. I have some good and some bad news for you. The bad news is that the code base of the PHP runtime is pretty large. The good news is that you likely only need to make changes in a tiny fraction of it in order to implement a language improvement. The changes are likely to hit one or more of a small group of files that contains the most critical bits. I will mention a few of them in a moment.</p>
+              <h3>Runtime Phases</h3>
+              <p>First, it is useful to coarsely know the various phases that the PHP runtime operates in. These phases translate into different sets of source code files that implement them.</p>
+              <dl>
+                <dt>Language Scanning</dt><dd>A PHP source file is first processed by a <i>language scanner</i>. A language scanner splits the source into a sequence <i>tokens</i>, like strings and keywords.</dd>
+                <dt>Parsing</dt><dd>A parser is used to transform a token sequence into a hierarchical structure called an <i>Abstract Syntax Tree</i> (AST).</dd>
+                <dt>Compilation</dt><dd>The compiler generates <i>opcodes</i> from the AST. The opcodes are the low level instructions executed by the PHP Virtual Machine.</dd>
+                <dt>Optimization</dt><dd>The opcode sequences are in turn processed by various optimizers.</dd>
+                <dt>Execution</dt><dd>Finally, the opcode sequences are executed by invoking opcode handlers. Each opcode has an associated handler. Traditionally this is a C function that implements the opcode. Today, PHP also features an integrated JIT compiler which provides alternative opcode handlers that output machine code.</dd>
+              </dl>
+              <h3>The Core</h3>
+              <p>The files that constitute the core of the PHP runtime are all found in the <code>Zend/</code> subdirectory and include the following:</p>
+                <dl>
+                  <dt>zend_language_scanner.l</dt><dd>The PHP language scanner (in re2c syntax)</dd>
+                  <dt>zend_language_parser.y</dt><dd>The PHP language grammar in Bison format</dd>
+                  <dt>zend_compile.c</dt><dd>The PHP compiler</dd>
+                  <dt>zend_execute.c</dt><dd>Contains execution support functions</dd>
+                  <dt>zend_vm_def.h</dt><dd>Contains the opcode handlers</dd>
+                </dl>
+              <p>The language scanner is generated by re2c using <code>zend_language_scanner.l</code> as input. The parser is generated using Bison using <code>zend_language_parser.y</code> as input. Touching just these two files may be sufficient to introduce new syntax in PHP.</p>
+              <p>The PHP compiler is found in <code>zend_compile.c</code>. In case you want to make an improvement to the PHP language that requires changes in the opcode sequences generated by PHP you likely need to make adjustments there.</p>
+              <p>The opcode handlers focus on one task: Figure out what to do by inspecting the arguments of a particular opcode and translate this into low level operations on the Virtual Machine. The opcode handlers can be found in <code>zend_vm_def.h</code>. That's right, one huge file containing the handlers for all opcodes. And it is not even the actual, proper C implementation. The actual opcode handling code is in <code>zend_vm_execute.h</code>, which is generated from <code>zend_vm_def.h</code>. The reason why the actual handlers are generated is that each handler in <code>zend_vm_def.h</code> may generate multiple handler variants in <code>zend_vm_execute.h</code>. These variants are specializations which allow the virtual machine to invoke a more efficient handler for a particular opcode depending on how it is used.</p>
+              <p>Finally, the opcode handlers delegate to a collection of functions in <code>zend_execute.c</code>. These functions perform the actual operations on the virtual machine. Reading and writing of variables, throwing exceptions, executing method calls, this is the place where it all happens. A great resource on how the PHP Virtual Machine works is <a href="https://www.npopov.com/2017/04/14/PHP-7-Virtual-machine.html">this blog post</a> by Nikita Popov.</p>
+              <h3>Internals Slang</h3>
+              <p>When studying the PHP runtime source code you will quickly learn that there is some specific terminology that you are obviously supposed to be familiar with. Let us introduce you to some of those.</p>
+              <dl>
+                <dt>zval</dt><dd>Any variable in a PHP script is internally represented by a data structure called a zval. There are loads of macros that deal with zvals. Typically, these macros have names starting like <code>Z_</code> or <code>ZVAL_</code>. A great resource on zvals is <a href="https://www.npopov.com/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html">this blog post</a> by Nikita Popov.</dd>
+                <dt>CE</dt><dd>A CE is a Class Entry, which is a data structure representing a class in PHP.</dd>
+                <dt>oparray</dt><dd>An oparray is a sequence of opcodes. After compilation any PHP function or method has an associated oparray holding its opcodes.</dd>
+                <dt>CG</dt><dd>The name of a frequently used macro for accessing the Compiler Globals. This is a global data structure that is used by the PHP compiler while compiling scripts. The data structure holds things like the current line number, the current CE, the oparray that opcodes are written into, and so on.</dd>
+                <dt>EG</dt><dd>Another name of a widely used macro. Its role is similar to that of CG but for a different data structure: the Execution Globals. This data structure supports the execution phase rather than the compilation phase. It contains the list of available classes, functions, the current stack frame, the symbol table, and so on.</dd>
+                <dt>EX</dt><dd>This is the name of a commonly encountered macro that accesses the current execution context. It contains things like the current value of $this and the currently executing function.</dd>
+              </dl>
+              <h3>GDB as a Tour Guide</h3>
+              <p>A convenient way to get to know your way around in a new code base is to get yourself onto a free tour. Basically, it works like this:</p>
+
+              <ol>
+                <li>Write a really small PHP script that performs some operation that you are interested in</li>
+                <li>Set some break points in the PHP runtime that you think may get triggered while executing your PHP script</li>
+                <li>Run the PHP script using GDB</li>
+                <li>Use step debugging to follow the code path executing your script</li>
+              </ol>
+              <p>For example, you might want to know how the PHP virtual machine executes adding two integers. To figure that out, write a PHP script that contains nothing but a simple addition, set some breakpoints in places inside zend_execute.c that appear to be relevant and run the script.</p>
+
+              <p><b>Hint:</b> You may run into the optimizer doing smart stuff like executing your code in a different way or not executing your code at all. It can be helpful to disable all optimizations by passing <code>-d opcache.optimization_level=0</code> to the PHP CLI.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>In Closing</h2>
+              <p>Of course there are many more things that are useful to know when hacking the PHP runtime, way more than a single blog article can cover. My goal was to get you started by providing some information that would have helped me out when I got my first look at the code. So I'm just hoping that I left enough of a challenge for you to try your brain on it. ;)
+              </p>
+              <p>I will close this post by listing some great resources that may be helpful to you:</p>
+              <ul>
+                <li><a href="https://phpinternals.net/">PHP Internals website</a></li>
+                <li><a href="https://www.phpinternalsbook.com/">PHP Internals book</a></li>
+                <li><a href="https://github.com/php/php-src/tree/master/docs">Docs directory in PHP source code repository</a></li>
+                <li><a href="https://www.youtube.com/watch?v=mT6hop_dKKI">Derick Rethans – It's all about the GOTO</a></li>
+                <li><a href="https://www.youtube.com/watch?v=AfLiQQvdsLU">Nikita Popov - Static Optimization of PHP Bytecode</a></li>
+                <li><a href="https://nikic.github.io/2017/04/14/PHP-7-Virtual-machine.html">Nikita Popov - PHP 7 Virtual Machine</a></li>
+                <li><a href="https://www.npopov.com/2015/05/05/Internal-value-representation-in-PHP-7-part-1.html">Nikita Popov - Internal value representation in PHP 7 - Part 1</a></li>
+                <li><a href="https://www.npopov.com/2015/06/19/Internal-value-representation-in-PHP-7-part-2.html">Nikita Popov - Internal value representation in PHP 7 - Part 2</a></li>
+                <li><a href="https://www.npopov.com/2012/07/27/How-to-add-new-syntactic-features-to-PHP.html">Nikita Popov - How to add new (syntactic) features to PHP</a></li>
+              </ul>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <aside>
+          <div class="row my-5 text-center">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="small">Copyright © Dik Takken</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="text-center small"><a href="../">back to posts</a></p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </aside>
+      </article>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+</div>
+</body>
+</html>

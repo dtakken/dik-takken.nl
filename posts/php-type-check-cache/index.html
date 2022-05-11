@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dik Takken - Personal Blog">
+  <meta name="author" content="Dik Takken">
+
+  <title>Dik Takken - Personal Blog</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/mono-blue.min.css">
+  <link rel="stylesheet" href="../../assets/css/customizations.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js"></script>
+  <script src="../../assets/js/load-fonts.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row menubar">
+        <div class="col-4"><a href="../../about">About</a></div>
+        <div class="col-4"><a href="../">Blog</a></div>
+        <div class="col-4"><a href="../../contact">Contact</a></div>
+      </div>
+      <div class="row title">
+        <div class="col-lg-1"></div>
+        <div class="col-sm-8">
+          <p>Personal<br/>Blog</p>
+        </div>
+        <div class="col-sm-2 d-none d-md-block d-lg-block d-xl-block">
+          <div class="row" style="height: 3em">
+            <img src="../../assets/images/dik-bw-circular.png" class="mx-auto my-auto h-50" alt=""></div>
+        </div>
+        <div class="col-lg-1"></div>
+      </div>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+  <div class="row">
+    <div class="col-sm-1 d-none d-lg-block d-xl-block column-left"></div>
+    <div class="col-lg-10 bg-white column-center">
+      <div class="row my-b">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-9">
+          <p>/<a class="mx-2" href="../../">home</a>/<a class="mx-2" href="../">blog</a>/<a class="mx-2" href=".">php-type-check-cache</a></p>
+        </div>
+        <div class="col-sm-2"></div>
+      </div>
+      <article>
+        <div class="row text-center my-5 ">
+          <div class="col-lg-1"></div>
+          <div class="col-lg-9">
+            <h1 class="mx-auto my-auto">A Type Check Cache for PHP</h1>
+          </div>
+          <div class="col-lg-2"></div>
+        </div>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="initial col-sm-9">
+              <p>Recently I submitted my very first major contribution to the PHP Runtime System. It has been an adventurous experience dusting off my C / assembly programming skills and enjoying occasional segfaults.</p>
+              <p>As you may or may not know, PHP does run time type checks. That means that if we have a function</p>
+              <pre><code class="php">
+function foo(int $bar) {...}
+            </code></pre>
+
+              <p>then any call to foo will check that the value passed to foo really is an integer and not a string for instance. A function call is like a run time checkpoint where, momentarily, the type of a value becomes known with absolute certainty. This helps static code analyzers to be more accurate. It also helps to compile PHP into efficient opcode sequences by using specialized implementations of certain operations. And since recently, it also helps the newly added JIT compiler.</p>
+              <p>While that is really nice, type checks do have a cost. While this cost is completely negligible in practise there are two recent developments that may make type checks worthwhile to have a look at from a performance perspective. The first development is the introduction of union types. These simply take more time to check. Second, there is the JIT compiler. In some scenarios the JIT compiler can exploit type declarations to generate code that runs very, very fast. This fact may encourage people to add more type information to their code, resulting in more type checks.</p>
+              <p>There is another aspect about JIT compilers that is relevant here: Every single opcode needs to have both a C implementation and a hand written assembly implementation. When an assembly implementation is missing, the JIT will simply output a call to the existing C implementation. Currently, various operations are still lacking an assembly implementation and type checks are among those.</p>
+              <p>The trouble is that type checks are not trivial to implement in assembly. Checking for an integer is not that hard, but checking if some class Foo is an extension of class Bar requires searching the class hierarchy until a match is found. And if an assembly implementation did get written, chances are that it is not much faster than the C implementation. Finally, I also noted that each type check is done again and again, every single time the opcode is executed.</p>
+              <p>That got me to the idea to see if type checks could be cached by adding a <i>type check cache</i> (TCC). Not only would that save countless repetitive checks, it would also reduce a type check to a simple table lookup. Writing an implementation for the JIT compiler would become much simpler.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Implementation</h2>
+              <p>The idea for implementing the cache is to have a global matrix that has entries for combinations of:</p>
+              <ul>
+                <li>a class (or interface)</li>
+                <li>the name of a type (like <code>"Foo|Bar|null"</code>)</li>
+              </ul>
+              <p>Each entry holds a zero in case the combination is not a match or a one in case it is a match. Each class will have a column in the cache, while each type name is assigned a row.</p>
+              <p>I added the column indices of the classes to the class data structure as defined in <code>Zend/zend.h</code>:</p>
+
+              <pre><code class="diff">
+ struct _zend_class_entry {
+ 	char type;
+ 	zend_string *name;
+ 	/* class_entry or string depending on ZEND_ACC_LINKED */
+ 	union {
+ 		zend_class_entry *parent;
+ 		zend_string *parent_name;
+ 	};
+ 	int refcount;
++	int tcc_column_index; /* Assigned column in type check cache */
+ 	uint32_t ce_flags;
+                  </code></pre>
+
+              <p>The type check cache itself goes into the <i>compiler globals</i>, which is a globally available data structure for the PHP compiler, as defined in <code>Zend/zend_globals.h</code>:</p>
+
+              <pre><code class="diff">
+     HashTable *function_table;    /* function symbol table */
+     HashTable *class_table;       /* class table */
+
++    uint8_t **type_check_cache;
++    int last_assigned_tcc_column; /* Last TCC column assigned to any CE */
++
+     HashTable filenames_table;
+                  </code></pre>
+
+              <p>Note that we also track the width of the table here. Next, we add a hash table for storing the type names and assigning them row indices:</p>
+
+              <pre><code class="diff">
+     HashTable *function_table;    /* function symbol table */
+     HashTable *class_table;       /* class table */
+
+     uint8_t **type_check_cache;
+     int last_assigned_tcc_column; /* Last TCC column assigned to any CE */
++    HashTable *type_names_table;  /* List of type names corresponding to rows in type_check_cache */
+
+     HashTable filenames_table;
+                  </code></pre>
+              <p>The hash table will contain an entry for each type name. We will use it later to implement the actual type checks, looking up which row a particular type name corresponds to.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>The Run Time Cache</h2>
+              <p>In order to perform a type check of a variable using our cache matrix we need to know which row and column to read. The column indices are easily read from the variable (called a "zval" inside the virtual machine) that needs to be checked. A zval representing a class instance contains a pointer to the data structure of the associated class, which in turn contains the column index we just added.</p>
+              <p>Determining which row to read from is a bit more difficult. The reason is that we need to look up the index of the type name. Type names are stored in a hash table, which means we need to do a hash table lookup. Doing a hash table lookup could easily be as expensive as doing a regular, full type check. It will defeat the purpose of using the cache.</p>
+              <p>Thankfully, the PHP runtime system has a solution for our problem: the <i>run time cache</i>. The run time cache is a small memory area associated with each PHP function. It is a simple array of pointers shared by all opcodes in the function. Opcodes can read and write into the run time cache to have some quickly accessible pointers to various run time information.</p>
+              <p>While producing opcodes the PHP compiler will allocate slots in the run time cache. The offsets of these slots are stored in the operands of the opcodes. There are various opcodes that perform type checks. For our purposes we will focus on the <code>RECV</code> opcode, which reads function arguments at the entry point of a function and checks their types. What we need to do now is:</p>
+              <ul>
+                <li>Adjust generation of <code>RECV</code> opcodes to allocate an extra cache slot</li>
+                <li>Adjust the implementation of <code>RECV</code> to use that cache slot for storing pointers to TCC rows</li>
+              </ul>
+              <p>We will start by adjusting the compiler to allocate an extra cache slot in the <code>zend_compile_params()</code> function in <code>Zend/zend_compile.c</code>:</p>
+              <pre><code class="diff">
+if (type_ast) {
+-  /* Allocate cache slot to speed-up run-time class resolution */
++  /* Allocate cache slot to speed-up run-time class resolution and type checking. */
+   opline->extended_value =
+-    zend_alloc_cache_slots(zend_type_get_num_classes(arg_info->type));
++    zend_alloc_cache_slots(1 + zend_type_get_num_classes(arg_info->type));
+}
+                  </code></pre>
+              <p>You might wonder how I know where to find this code in the vastness of the PHP codebase. Well, I did what I usually do when faced with an unfamiliar code base: I get myself on a free tour. First, I write a minimal test script that will trigger the behaviour that I am interested in, a function argument type check in this case. Then I use a debugger to set some breakpoints in the code base, in places that I suspect may be executed when the script is run. As soon as I manage to place a breakpoint that gets triggered I follow the code flow from there. Often times I add comments in the source detailing what is happening there.</p>
+              <p>In the same way I found out that the implementation of the <code>RECV</code> opcode is in <code>Zend/zend_execute.c</code>. The type check implementation looks like this:</p>
+              <pre><code class="c">
+static zend_always_inline zend_bool zend_check_type(
+       zend_type type, zval *arg, void **cache_slot,
+       zend_class_entry *scope, zend_bool is_return_type,
+       zend_bool is_internal)
+{
+  zend_reference *ref = NULL;
+  ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
+
+  if (UNEXPECTED(Z_ISREF_P(arg))) {
+    ref = Z_REF_P(arg);
+    arg = Z_REFVAL_P(arg);
+  }
+
+  if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE_P(arg)))) {
+    return 1;
+  }
+
+  return zend_check_type_slow(
+    type, arg, ref, cache_slot, scope, is_return_type, is_internal
+  );
+}
+            </code></pre>
+              <p>At this point it is useful to know that there are basically two kinds of type checks in PHP, implementation-wise. Most type checks can be done by checking the type bitmask of the value. The mask has one bit for integers, one for booleans, and so on. In the above code, the <code>ZEND_TYPE_CONTAINS_CODE</code> macro is doing a so called simple type check by comparing the bitmask of the value to the type.</p>
+              <p>When the value is an object, things get more complicated. The thing is that every single class is a type of its own and all of these types are not going to fit into the type bitmask. Also, checking if an object of class <code>Foo</code> is an instance of class <code>Bar</code> may very well yield <code>true</code> even though these are different classes. In case <code>Bar</code> is an interface implemented by <code>Foo</code>, the check should pass. So directly comparing the class names is not enough. Then there are union types like <code>Foo|Bar|null</code>, which are even more complicated to check.</p>
+              <p>All of these complex type checks are handled separately by the <code>zend_check_type_slow()</code> function that you can see being called above. This is the function where we want to use the type check cache before going down the complexity of doing a full type check. This is also why our cache will only be used for checking objects. It will not handle checks involving integers, strings, and so on.</p>
+              <p>At the very start of <code>zend_check_type_slow()</code>, we make the following change:</p>
+              <pre><code class="diff">
+ {
+ 	uint32_t type_mask;
++	uint8_t *tcc = NULL;
++	uint8_t *tcc_cache_row = NULL;
+ 	if (ZEND_TYPE_HAS_CLASS(type) && Z_TYPE_P(arg) == IS_OBJECT) {
++		tcc_cache_row = *cache_slot;
++		if (UNEXPECTED(!tcc_cache_row)) {
++			// Pointer to the row in the type check cache is not
++			// in the run time cache yet. Fetch it now.
++			tcc_cache_row = tcc_get_row(&type);
++			*cache_slot = tcc_cache_row;
++		}
++
++		// Compute address of type check cache entry
++		tcc = tcc_cache_row + Z_OBJCE_P(arg)->tcc_column_index;
++
++		if (EXPECTED(*tcc)) {
++			// We did this type check before and it
++			// was a match. We are done.
++			return 1;
++		}
++
++		ZEND_ASSERT(*tcc == 0);
++
++		// Jump to the cache slots that contain the CE.
++		cache_slot++;
++
+ 		zend_class_entry *ce;
+            </code></pre>
+              <p>The <code>cache_slot</code> is a pointer to the first entry in the run time cache that is allocated for executing the current opcode. We are lucky to get it passed by the caller, we can just use it right away. The code flow is optimistic, it assumes that the cache has a pointer to the row in the TCC that corresponds to the type name from the type declaration of the function parameter. We fetch it and add to it the column index of the class that is associated with the passed function argument. Then we check if the cache entry contains a nonzero value and return immediately.</p>
+              <p>In case the run time cache does not know the TCC row yet, we call <code>tcc_get_row()</code> to find it and store it in the run time cache. We will look at that function in a moment.</p>
+              <p>In case the TCC entry contains a zero, this can have any of three different meanings:</p>
+              <ol>
+                <li>This is the first time this type check is done</li>
+                <li>The type check was done before and failed</li>
+                <li>The type check is not covered by the TCC</li>
+              </ol>
+              <p>In all cases the TCC will be ignored and the code flow will continue to do a regular full type check. Note that we cannot distinguish between cases 1 and 2. In both cases the cache will contain a zero (we will talk about case 3 in a minute) and in both cases we act like the cache entry is uninitialized. The assumption that we do here is that it is not useful to try and accelerate type check failures, as these will result in additional expensive processing, like raising and handling exceptions. Whenever a type check fails, the cache will not remember and do a full type check again the next time. </p>
+              <p>Case number three is a special one. In order to prevent the TCC from getting too big, not all classes and type names will be covered by the cache. A column index of zero is reserved for indicating classes not covered by the cache. The column index stored in the class will be zero in this case. Also, the TCC has one <i>dummy row</i> consisting of all zeros, representing all type names that are not covered. In both cases we must take care not to write a '1' into these cache entries after a successful type check. The following code snippet shows how the cache entry is populated after a successful type check:</p>
+              <pre><code class="diff">
+ if (instanceof_function(Z_OBJCE_P(arg), ce)) {
++	if (TCC_CONTAINS(tcc_cache_row, Z_OBJCE_P(arg))) {
++		// Store type check result in cache
++		*tcc = 1;
++	}
+ 	return 1;
+ }
+            </code></pre>
+              <p>The magic is in the <code>TCC_CONTAINS</code> macro. It checks if the cache covers the check. The macro is defined as follows:</p>
+              <pre><code class="c">
+ #define TCC_CONTAINS(row, ce) ( \
+  ce->tcc_column_index > 0 && row != CG(tcc_dummy_row) \
+)
+           </code></pre>
+              <p>This checks the column index of the class entry (<code>ce</code>) and checks if the TCC row is not the dummy row as stored in the Compiler Globals (<code>CG</code>).</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Cache Row Management</h2>
+              <p>We promised to show how the <code>tcc_get_row()</code> function works. This function fetches the row in the TCC that corresponds to a particular type name. As the cache grows dynamically at run time, it will also allocate new rows when needed. We will take on this function a bit a a time:</p>
+              <pre><code class="c">
+ZEND_API uint8_t *tcc_get_row(zend_type *type)
+{
+   zval type_name_z;
+   zend_string *type_name;
+   zend_string *type_name_copy;
+
+   type_name = zend_type_to_string(*type);
+
+   ZVAL_STR(&type_name_z, type_name);
+
+   // Look up the type name in CG(type_names_table)
+
+   int exists = 0;
+   zval *entry;
+   zend_ulong index = 0;
+   ZEND_HASH_FOREACH_NUM_KEY_VAL(CG(type_names_table), index, entry) {
+   	if (fast_is_identical_function(&type_name_z, entry)) {
+   	  // We found the type name.
+   	  exists = 1;
+   	  break;
+   	}
+   } ZEND_HASH_FOREACH_END();
+                  </code></pre>
+              <p>We start by traversing the hash table until we find the index of the type name. The PHP hashtable API is described in more detail <a href="http://www.phpinternalsbook.com/php5/hashtables/hashtable_api.html">here</a>. So if we find the type name then <code>exists == 1</code> and <code>index</code> contains the index in the hash table, which is also the row index in the TCC. </p>
+              <p>On to the next bit:</p>
+              <pre><code class="c">
+if (!exists) {
+  // Type name not found. We should add it to the hash table.
+
+  if ((zend_array_count(CG(type_names_table)) + 1) *
+      EG(tcc_num_class_slots) * sizeof(uint8_t) > EG(tcc_memory_limit)) {
+  	// Adding the type name would exceed memory limits.
+  	// We return the dummy cache row which yields a cache
+  	// miss for any CE.
+  	if (!CG(tcc_dummy_row)) {
+  	  CG(tcc_dummy_row) = calloc(EG(tcc_num_class_slots), sizeof(uint8_t));
+  	}
+  	zend_string_release(type_name);
+  	return CG(tcc_dummy_row);
+  }
+
+  if (CG(type_names_table)->nNumOfElements > 0) {
+  	index++;
+  }
+
+  type_name_copy = zend_string_dup(type_name, 0);
+  ZVAL_STR(&type_name_z, type_name_copy);
+  zend_hash_index_add(CG(type_names_table), index, &type_name_z);
+  zend_string_release(type_name_copy);
+
+  // Now that we have a new type name, we must also add
+  // a new row for it in the cache matrix.
+  CG(type_check_cache) = realloc(
+    CG(type_check_cache),
+    zend_array_count(CG(type_names_table)) * sizeof(uint8_t *)
+  );
+  CG(type_check_cache)[index] = calloc(
+    EG(tcc_num_class_slots), sizeof(uint8_t)
+  );
+}
+                  </code></pre>
+              <p>Here we handle the case where the type name is not in the hashtable yet, which also means that the TCC has no row for it. When the cache is already too large we return the dummy row, containing all zeros. Otherwise, we allocate a new row and add it to the TCC. The tricky bit here is to get the memory management for the type strings right. Forgetting to release a string will mess up the reference counting in the PHP memory manager for instance. I guess the code has room for improvement, but it works.</p>
+              <p>The last part cleans up and returns the TCC row.</p>
+              <pre><code class="c">
+  zend_string_release(type_name);
+
+  return CG(type_check_cache)[index];
+}
+                  </code></pre>
+              <p>We covered most of the implementation of the type check cache now. At least, the implementation in the regular compiler and virtual machine. Coming up: The JIT implementation.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>The JIT implementation</h2>
+              <p>The PHP JIT is built on <a href="http://luajit.org/dynasm.html">Dynasm</a>. Dynasm allows mixing C code and assembly code. Dynasm code looks like this:</p>
+
+              <pre><code class="diff">
+	if (op1_info & MAY_BE_REF) {
+		|	mov cl, byte [r0 + 8]
+	} else {
+		|	mov cl, byte [FP + opline->op1.var + 8]
+	}
+                  </code></pre>
+
+              <p>The lines prepended with a pipe (|) are assembly instructions that will be processed by Dynasm. The remaining lines are just plain C. When compiling PHP, the Dynasm source code is first translated into pure C and then compiled like any other C source file. The assembly dialect allows referencing C variables, which is really convenient. I can't go into all of the details here and will try to explain the most important bits as we go.</p>
+              <p>Each PHP opcode has a corresponding handler in the JIT. These handlers can be found in <code>ext/opcache/jit/zend_jit_x86.dasm</code>. Below I will show how to integrate the type check cache into the handler of the <code>RECV</code> opcode. Hang on, here we go:</p>
+              <pre><code class="diff">
+  if (is_power_of_two(type_mask)) {
+       uint32_t type_code = concrete_type(type_mask);
+       |    cmp byte [r0 + 8], type_code
+-      |    jne >8
++      |    jne >7
+  } else {
+       |    mov edx, 1
+       |    mov cl, byte [r0 + 8]
+       |    shl edx, cl
+       |    test edx, type_mask
+-      |    je >8
++      |    je >7
+  }
++ |    jmp >1
++
++ |7:
++ |    // TODO: Insert TCC check here.
++
++ |    jmp >8 // Jump into cold_code segment
+ 
+  |.cold_code
+  |8:
+                </code></pre>
+              <p>The code that we are looking at here is the very start of the type checking process in the handler. The first few lines check if a simple bitmask check will suffice and output the appropriate instruction sequence. If it passes, a jump to label 1 will lead to the end of the opcode handler. Else, it jumps to label 8 in the cold code segment. The code path that follows in that segment (not shown here) calls a C function to do a regular full type check.</p>
+              <p>So what did we accomplish with the above change? All we did is adjust the flow of the code somewhat in order to create a space where our new type checking code can fit in. We introduced a new label (7) and in stead of giving up and jumping to label 8, we jump to the new label. At this stage, the first instruction immediately jumps to 8 again, so our change has no net effect. But this is where the new type check code can fit in.</p>
+              <p>Even though the change appears trivial, I did compile and run the PHP test suite to make sure I did not break anything. Debugging assembly code after making larger changes is not a whole lot of fun, so I like taking tiny steps.</p>
+              <p>Now it is time to add the actual type check:</p>
+              <pre><code class="diff">
+
+  |7:
+- |    // TODO: Insert TCC check here.
++
++ if (ZEND_TYPE_HAS_CLASS(type)) {
++      uint8_t *tcc_row = tcc_get_row(&type);
++      |    // Make sure that argument is an object.
++      |    IF_NOT_Z_TYPE r0, IS_OBJECT, >8
++      |    // Find the class entry of the value.
++      |    mov r0, [r0 + offsetof(zval, value.obj)]
++      |    mov r0, [r0 + offsetof(zend_object, ce)]
++      |    // Load the TCC column index. This is a 32-bit int value
++      |    // which we load into the a 32-bit register.
++      |    mov eax, [r0 + offsetof(zend_class_entry, tcc_column_index)]
++      |    // Load pointer to TCC row
++      |    LOAD_ADDR r2, tcc_row
++      |    // When cache entry equals one, we have a hit and we're done.
++      |    // Else, we don't know and we will continue to do a full check.
++      |    cmp byte [r2 + eax], 1
++      |    je >1
++ }
++
+  |    jmp >8 // Jump into cold_code segment
+
+  |.cold_code
+  |8:
+                </code></pre>
+              <p>The code leading up to our type check has already placed the address of the passed function argument in register <code>r0</code>. From there, we can find the reference to the object in the function argument, the class entry belonging to that object and finally the TCC column index of that class. The column index is loaded in the <code>eax</code> register. The <code>LOAD_ADDR</code> macro loads the address of the TCC row into <code>r0</code> in the correct way depending on the CPU type (32/64-bit).</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>JIT: Test and Debug</h2>
+              <p>In order to check if the new assembly code is indeed generated by the JIT, we create a tiny test script:</p>
+              <pre><code class="php">
+&lt;?php
+
+function test(DateTime $date)
+{
+    return;
+}
+                  </code></pre>
+              <p>Now we can compile the PHP CLI executable and execute the test script, like this:</p>
+              <pre><code>
+php -d opcache.enable_cli=1 \
+    -d opcache.enable=1 \
+    -d opcache.jit_buffer_size=50000000 \
+    -d opcache.jit=1205 \
+    -d opcache.jit_debug=1 \
+    -d opcache.optimization_level=0 \
+    -d zend_extension=modules/opcache.so \
+    test.php
+                  </code></pre>
+              <p>The commandline options assure that nothing is optimized away, forces everything to be JIT compiled and outputs a debug dump of the assembly code. In the output, the following instruction sequence appears:</p>
+              <pre><code>
+cmp $0x8, 0x8(%rax)
+jnz .L7
+mov (%rax), %rax
+mov 0x10(%rax), %rax
+mov 0x1c(%rax), %eax
+mov $0x56535154bd90, %rdx
+cmp $0x1, (%rdx,%rax)
+jz .L2
+jmp .L7
+                  </code></pre>
+              <p>While it is represented in a slightly different way (it says <code>rax</code> in stead of <code>r0</code> for instance), comparing it clearly shows that this is our nice little JIT enhancement showing up. Yay!</p>
+              <p>Now I will admit that I did not get this right on the first try. Or even on the second. Or the third. The last time I did any assembly programming no x86-64 capable CPUs did exist, so I had to learn some new stuff here as well.</p>
+              <p>That said, let me show you a quick debugging trick I used when writing the above assembly sequence. At some point I got a segfault and my suspicion was that the value in <code>eax</code> was incorrect. Now I wanted to inspect the registers right after setting <code>eax</code>. Amazingly the PHP JIT has built-in debugging support. You can actually set breakpoints in the Dynasm source code and they will work. Well, kind of. Unfortunately at the time of writing these break points tend to be slightly off. So I used a somewhat blunt but effective debugging technique here: Intentionally generate a segfault at a specific point in the instruction sequence:</p>
+              <pre><code class="diff">
+
+       |    mov r0, [r0 + offsetof(zval, value.obj)]
+       |    mov r0, [r0 + offsetof(zend_object, ce)]
+       |    // Load the TCC column index. This is a 32-bit int value
+       |    // which we load into the a 32-bit register.
+       |    mov eax, [r0 + offsetof(zend_class_entry, tcc_column_index)]
++      |    mov r0, [0]
+       |    // Load pointer to TCC row
+       |    LOAD_ADDR r2, tcc_row
+                  </code></pre>
+              <p>The read from the null pointer generates a segfault right after loading <code>eax</code>. When run using GDB, this halts execution and we can inspect the value of eax:</p>
+              <pre><code class="console">
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff25f077f in ?? ()
+(gdb) info registers eax
+eax            0x71                113
+                  </code></pre>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Results</h2>
+              <p>As the intent of this work was to get some speed gains, the proof of the pudding is in the benchmark. So I borrowed some code from Dmitry Stogov to come up with a <a href="https://gist.github.com/dtakken/1539d64170921363dc8d1ed62effcd45">benchmarking script</a>. Below I will show a selection of the results, focusing only on function argument type checks again.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5" style="">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <img class="w-100" alt="" src="../../assets/posts/php-type-check-cache/performance.svg">
+              <p>The above graphic shows the various benchmark tests (horizontal) and the observed speedup relative to the master branch. The tests simply call a function in a loop while passing one argument. The functions differ in the parameter type declarations. The function calls differ in the type of variable passed. The type check complexity increases in each subsequent test as described below:</p>
+              <p>
+              <table>
+                <tbody>
+                <tr>
+                  <td><b>func($x)</b></td>
+                  <td>No type checking. Pass an integer.</td>
+                </tr>
+                <tr>
+                  <td><b>func($obj)</b></td>
+                  <td>No type checking. Pass an object.</td>
+                </tr>
+                <tr>
+                  <td><b>func(A|B|C|null $obj) (null)</b></td>
+                  <td>Union type check. Pass null.</td>
+                </tr>
+                <tr>
+                  <td><b>func(A|B|C|null $obj) (A)</b></td>
+                  <td>Union type check. Pass A object.</td>
+                </tr>
+                <tr>
+                  <td><b>func(A|B|C|null $obj) (C)</b></td>
+                  <td>Union type check. Pass C object.</td>
+                </tr>
+                <tr>
+                  <td><b>func(A|B|C|null $obj) (D)</b></td>
+                  <td>Union type check. Pass D object (extends C).</td>
+                </tr>
+                <tr>
+                  <td><b>func(A|B|C|null $obj) (E)</b></td>
+                  <td>Union type check. Pass E object (extends D).</td>
+                </tr>
+                <tr>
+                  <td><b>func(A|B|C|null $obj) (F)</b></td>
+                  <td>Union type check. Pass F object (extends E).</td>
+                </tr>
+                </tbody>
+              </table>
+              </p>
+              <p>The results look a bit mixed and the gains are not spectacular. The gains are greater for type checks that are more complex. This is expected, because the cost of simple and complex type checks are the same then the TCC is used.</p>
+              <p>Next, let's add the results that have the JIT compiler enabled:</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5" style="">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <img class="w-100" alt="" src="../../assets/posts/php-type-check-cache/performance-jit.svg">
+              <p>This looks quite a bit different. The gains are higher, especially for complex type checks. This is probably due to the very nature of a JIT compiler: It takes away much of the overhead of the virtual machine. With the JIT turned off, there is quite a baseline of overhead and the cost of type checks is relatively small compared to the baseline. When this overhead is reduced, the gains stand out much more.</p>
+              <p>I must admit that the comparison with and without JIT is not completely fair. At the time of writing the JIT had no implementation for type checks involving objects, so it called the C implementation. So the gain observed is due to both caching <i>and</i> reduced overhead.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <section>
+          <div class="row">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <h2>Conclusion</h2>
+              <p>I think the idea worked out quite nicely. Especially when the JIT compiler is enabled some nice speedups can be achieved. While the benchmarks look promising, I find it hard to predict if this enhancement will bring any noticeable gains in more realistic use cases. Also, the code is not ready to be merged. When I submitted <a href="https://github.com/php/php-src/pull/5096">my pull request</a>, Nikita Popov pointed out that assigning column indices to classes will not work in some scenarios that I did not consider. More work would be needed to get this into shape.</p>
+              <p>While the change will not be merged, this work was by no means a waste of time. It was fun to do and I learned a lot. Maybe I will pick it up again some time in the future.</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </section>
+        <aside>
+          <div class="row my-5 text-center">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="small">Copyright © Dik Takken</p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+          <div class="row my-5">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-9">
+              <p class="text-center small"><a href="../">back to posts</a></p>
+            </div>
+            <div class="col-sm-2"></div>
+          </div>
+        </aside>
+      </article>
+    </div>
+    <div class="col-sm-1 d-none d-lg-block d-xl-block"></div>
+  </div>
+</div>
+</body>
+</html>
